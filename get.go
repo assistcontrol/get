@@ -16,9 +16,15 @@ import (
 	"golang.org/x/term"
 )
 
-var (
-	URLPattern = regexp.MustCompile(`^https?://`)
+const (
+	// Default values for Chroma
+	ChromaDefaultFT = "html"
+	ChromaFormat    = "terminal16m"
+	ChromaStyle     = "catppuccin-mocha"
 )
+
+// Simple check for an HTTP-like protocol
+var URLPattern = regexp.MustCompile(`^https?://`)
 
 func main() {
 	args := os.Args
@@ -87,17 +93,16 @@ func colorize(raw []byte) string {
 
 	lexer := lexers.Analyse(contents)
 	if lexer == nil {
-		lexer = lexers.Get("html")
+		lexer = lexers.Get(ChromaDefaultFT)
 	}
-	fmt.Printf("Lexer: %s\n", lexer.Config().Name)
 	lexer = chroma.Coalesce(lexer)
 
-	style := styles.Get("catppuccin-mocha")
+	style := styles.Get(ChromaStyle)
 	if style == nil {
 		style = styles.Fallback
 	}
 
-	formatter := formatters.Get("terminal16m")
+	formatter := formatters.Get(ChromaFormat)
 	if formatter == nil {
 		formatter = formatters.Fallback
 	}
