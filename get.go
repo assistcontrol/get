@@ -28,16 +28,14 @@ func main() {
 	}
 	url := args[1]
 
-	file, err := os.ReadFile(url)
-	if err == nil {
-		show(file)
-		return
+	contents, err := os.ReadFile(url)
+	if err != nil {
+		contents, err = get(url)
+		if err != nil {
+			log.Fatalf("Error: %v", err)
+		}
 	}
 
-	contents, err := get(url)
-	if err != nil {
-		log.Fatalf("Error: %v", err)
-	}
 	show(contents)
 }
 
@@ -46,22 +44,20 @@ func help() {
 }
 
 func get(url string) ([]byte, error) {
-	var contents []byte
-	var err error
-
 	if URLPattern.MatchString(url) {
-		contents, err = fetch(url)
+		contents, err := fetch(url)
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		contents, err = fetch("https://" + url)
-		if err != nil {
-			contents, err = fetch("http://" + url)
-		}
-		if err != nil {
-			return nil, err
-		}
+		return contents, nil
+	}
+
+	contents, err := fetch("https://" + url)
+	if err != nil {
+		contents, err = fetch("http://" + url)
+	}
+	if err != nil {
+		return nil, err
 	}
 
 	return contents, nil
