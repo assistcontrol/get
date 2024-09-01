@@ -1,65 +1,33 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"os"
-	"path/filepath"
+
+	"github.com/assistcontrol/get/config"
+	"github.com/assistcontrol/get/fetch"
+	"github.com/assistcontrol/get/output"
 )
-
-type mode int
-
-const (
-	GET mode = iota
-	SHOW
-)
-
-type config struct {
-	mode mode
-	url  string
-}
 
 func main() {
-	conf, err := newConfig(os.Args)
+	conf, err := config.NewConfig(os.Args)
 	if err != nil {
 		log.Printf("Error: %v\n%s", err, help())
 		os.Exit(1)
 	}
 
-	contents, err := fetch(conf.url)
+	contents, err := fetch.Fetch(conf)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 
-	if conf.mode == GET {
-		get(contents)
+	if conf.ShouldSave() {
+		output.Get(contents)
 	} else {
-		show(contents)
+		output.Show(contents)
 	}
 }
 
 func help() string {
 	return "Usage: get <url>"
-}
-
-func newConfig(args []string) (*config, error) {
-	c := &config{}
-
-	if len(args) != 2 {
-		return nil, errors.New("expected one argument")
-	}
-
-	c.url = args[1]
-
-	switch filepath.Base(args[0]) {
-	case "get":
-		c.mode = GET
-	case "show":
-		c.mode = SHOW
-	default:
-		return nil, fmt.Errorf("unknown command: %s", args[0])
-	}
-
-	return c, nil
 }

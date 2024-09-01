@@ -1,4 +1,4 @@
-package main
+package output
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 	"github.com/alecthomas/chroma/v2/formatters"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
+	"github.com/assistcontrol/get/body"
 	"golang.org/x/term"
 )
 
@@ -19,16 +20,15 @@ const (
 	ChromaStyle     = "catppuccin-mocha"
 )
 
-func show(bytes []byte) {
+func Show(b *body.Body) {
 	if term.IsTerminal(int(os.Stdout.Fd())) {
-		fmt.Println(colorize(bytes))
-		return
+		b.Body = colorize(b.Body)
 	}
 
-	fmt.Println(string(bytes))
+	fmt.Println(string(b.Body))
 }
 
-func colorize(raw []byte) string {
+func colorize(raw []byte) []byte {
 	contents := string(raw)
 
 	lexer := lexers.Analyse(contents)
@@ -49,14 +49,14 @@ func colorize(raw []byte) string {
 
 	iterator, err := lexer.Tokenise(nil, contents)
 	if err != nil {
-		return contents
+		return raw
 	}
 
 	var b bytes.Buffer
 	err = formatter.Format(&b, style, iterator)
 	if err != nil {
-		return contents
+		return raw
 	}
 
-	return b.String()
+	return b.Bytes()
 }
