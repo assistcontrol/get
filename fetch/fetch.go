@@ -17,19 +17,20 @@ var urlPattern = regexp.MustCompile(`^https?://`)
 // It first tries to read the file from the local filesystem. If that fails,
 // it tries to fetch the file from the remote URL. If that fails, it returns
 // an error.
-func Fetch(c *context.Ctx) error {
+func Fetch(c *context.Ctx) (err error) {
 	// Try local file first
-	if err := local(c); err == nil {
+	if err = local(c); err == nil {
 		c.SetLocalFilename()
-		return nil
+		return
 	}
 
-	if err := remote(c); err != nil {
-		return err
+	// Non-nil err means local file not found, so try fetching
+	// it remotely
+	if err = remote(c); err == nil {
+		c.SetRemoteFilename()
 	}
 
-	c.SetRemoteFilename()
-	return nil
+	return
 }
 
 // local reads a file from the local filesystem.
@@ -42,7 +43,7 @@ func local(c *context.Ctx) error {
 }
 
 // remote fetches a file from a remote URL.
-// It returns an error if the file cannot be fetched.
+// If the protocol isn't specified, try HTTPS then HTTP.
 func remote(c *context.Ctx) error {
 	if urlPattern.MatchString(c.Path) {
 		// It's a full URL, so fetch it directly
