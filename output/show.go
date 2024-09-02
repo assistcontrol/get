@@ -20,14 +20,20 @@ const (
 	chromaStyle     = "catppuccin-mocha"
 )
 
-func show(c *context.Ctx) {
+// show either colorizes and prints the body to the terminal
+// (if it's a terminal), or prints it as-is.
+func show(c *context.Ctx) error {
 	if term.IsTerminal(int(os.Stdout.Fd())) {
 		c.Body = colorize(c.Body)
 	}
 
 	fmt.Println(string(c.Body))
+
+	return nil
 }
 
+// colorize colorizes the raw byte slice. If anything goes wrong,
+// it just returns the raw input.
 func colorize(raw []byte) []byte {
 	contents := string(raw)
 

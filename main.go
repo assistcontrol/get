@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"log"
+	"fmt"
 	"os"
 
 	"github.com/assistcontrol/get/context"
@@ -19,11 +19,17 @@ func main() {
 	}
 
 	// Fetch the requested resource
-	err = fetch.Fetch(ctx)
-	if err != nil {
-		log.Fatalf("Error: %v", err)
+	if err = fetch.Fetch(ctx); err != nil {
+		die(err)
 	}
 
 	// Display or save it
-	output.Output(ctx)
+	if err = output.Output(ctx); err != nil {
+		die(err)
+	}
+}
+
+func die(e error) {
+	fmt.Fprintf(os.Stderr, "Error: %v\n", e)
+	os.Exit(1)
 }

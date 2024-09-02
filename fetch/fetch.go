@@ -1,3 +1,4 @@
+// Package fetch provides a functions to fetch from a local path or a remote URL.
 package fetch
 
 import (
@@ -12,6 +13,10 @@ import (
 // Simple check for an HTTP-like protocol
 var urlPattern = regexp.MustCompile(`^https?://`)
 
+// Fetch retrieves the contents of a file from a local path or a remote URL.
+// It first tries to read the file from the local filesystem. If that fails,
+// it tries to fetch the file from the remote URL. If that fails, it returns
+// an error.
 func Fetch(c *context.Ctx) error {
 	// Try local file first
 	if err := local(c); err == nil {
@@ -27,6 +32,8 @@ func Fetch(c *context.Ctx) error {
 	return nil
 }
 
+// local reads a file from the local filesystem.
+// It returns an error if the file cannot be read.
 func local(c *context.Ctx) error {
 	b, err := os.ReadFile(c.Path)
 	c.Body = b
@@ -34,6 +41,8 @@ func local(c *context.Ctx) error {
 	return err
 }
 
+// remote fetches a file from a remote URL.
+// It returns an error if the file cannot be fetched.
 func remote(c *context.Ctx) error {
 	if urlPattern.MatchString(c.Path) {
 		// It's a full URL, so fetch it directly
@@ -52,6 +61,9 @@ func remote(c *context.Ctx) error {
 	return err
 }
 
+// getHTTP fetches a file from a remote URL using the HTTP protocol.
+// If successful, it saves the http.Response object and extracts the
+// body of the response. It returns an error if the file cannot be fetched.
 func getHTTP(c *context.Ctx) error {
 	resp, err := http.Get(c.URL)
 	if err != nil {

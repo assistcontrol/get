@@ -8,17 +8,23 @@ import (
 	"os"
 )
 
+// Ctx combines configuration and runtime context.
 type Ctx struct {
-	Body        []byte
-	Destination string
-	Filename    string
-	Force       bool
-	Response    *http.Response
-	Path        string
-	Save        bool
-	URL         string
+	// Configuration
+	Filename string // User-specified filename
+	Force    bool   // Overwrite existing files
+	Path     string // User-provided URL or local path
+	Save     bool   // Whether to save output to a file
+
+	// Runtime context
+	Body        []byte         // Contents of the requested resource
+	Destination string         // Local filename to save to
+	Response    *http.Response // HTTP Response object for later introspection
+	URL         string         // Crafted URL to try fetching
 }
 
+// New creates a new context from the command line arguments.
+// It returns an error if the arguments are invalid.
 func New() (*Ctx, error) {
 	c := &Ctx{}
 

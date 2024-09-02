@@ -1,21 +1,30 @@
+// Package output provides functions that write to a destination file,
+// or colorize and write to the terminal.
 package output
 
 import (
-	"log"
 	"os"
 
 	"github.com/assistcontrol/get/context"
 )
 
-func Output(c *context.Ctx) {
+// Output looks at the context and decides what to do with the body.
+// If the save flag is set, it writes to the destination file.
+// Otherwise, it colorizes the body and writes it to the terminal.
+// It returns an error if something goes wrong.
+func Output(c *context.Ctx) error {
 	if c.Save {
-		save(c)
-	} else {
-		show(c)
+		return save(c)
 	}
+
+	return show(c)
 }
 
-func save(c *context.Ctx) {
+// save writes the body to the destination file. It will overwrite
+// existing files if the force flag is set. If the file already exists
+// and the force flag is not set, it will not overwrite the file.
+// It returns an error if the file cannot be written.
+func save(c *context.Ctx) error {
 	flags := os.O_WRONLY | os.O_CREATE
 	switch c.Force {
 	case true:
@@ -26,11 +35,11 @@ func save(c *context.Ctx) {
 
 	f, err := os.OpenFile(c.Destination, flags, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer f.Close()
 
-	if _, err = f.Write(c.Body); err != nil {
-		log.Fatal(err)
-	}
+	_, err = f.Write(c.Body)
+
+	return err
 }

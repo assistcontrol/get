@@ -9,12 +9,14 @@ import (
 const defaultFilename = "get.output"
 
 var (
-	// Simple check for a filename with an extension
+	// A filename that includes an extension
 	filenameWithExtension = regexp.MustCompile(`\.\w+$`)
-	// Simple check for a filename without an extension
+	// A filename with no extension
 	filenameWithoutExtension = regexp.MustCompile(`^\w+$`)
 )
 
+// SetLocalFilename sets the destination filename for a local file.
+// If the user has specified a filename, it uses that.
 func (c *Ctx) SetLocalFilename() {
 	if c.Filename != "" {
 		c.Destination = c.Filename
@@ -24,6 +26,12 @@ func (c *Ctx) SetLocalFilename() {
 	c.Destination = filepath.Base(c.Path)
 }
 
+// SetRemoteFilename sets the destination filename for a remote file.
+// If the user has specified a filename, it uses that.
+// It tries to determine the filename from the URL and Content-Type.
+// If it can't, it uses a default filename. This function should be
+// called after the response has been received, or it will fall back
+// to the default filename.
 func (c *Ctx) SetRemoteFilename() {
 	if c.Filename != "" {
 		c.Destination = c.Filename
