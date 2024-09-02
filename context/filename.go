@@ -1,8 +1,7 @@
-package filename
+package context
 
 import (
 	"mime"
-	"net/http"
 	"path/filepath"
 	"regexp"
 )
@@ -16,32 +15,52 @@ var (
 	filenameWithoutExtension = regexp.MustCompile(`^\w+$`)
 )
 
-func FromLocalPath(path string) string {
-	return filepath.Base(path)
+func (c *Ctx) SetLocalFilename() {
+	if c.Filename != "" {
+		c.Destination = c.Filename
+		return
+	}
+
+	c.Destination = filepath.Base(c.Path)
 }
 
-func FromHTTPResponse(resp *http.Response) string {
-	basename := filepath.Base(resp.Request.URL.RequestURI())
+func (c *Ctx) SetRemoteFilename() {
+	if c.Filename != "" {
+		c.Destination = c.Filename
+		return
+	}
 
-	// If we have a complete filename, return it
+	if c.Response == nil {
+		c.Destination = defaultFilename
+		return
+	}
+
+	basename := filepath.Base(c.Response.Request.URL.RequestURI())
+
+	// If we have a complete filename, use it
 	if filenameWithExtension.MatchString(basename) {
-		return basename
+		c.Destination = basename
+		return
 	}
 
 	// Determine an appropriate extension. If we can't, return the default
-	mimetype := resp.Header.Get("Content-Type")
+	mimetype := c.Response.Header.Get("Content-Type")
 	if mimetype == "" {
-		return defaultFilename
+		c.Destination = defaultFilename
+		return
 	}
 	extensions, err := mime.ExtensionsByType(mimetype)
 	if err != nil || len(extensions) == 0 {
-		return defaultFilename
+		c.Destination = defaultFilename
+		return
 	}
 	extension := extensions[len(extensions)-1]
 
 	// See if we can deduce a name, otherwise make up a filename
 	if filenameWithoutExtension.MatchString(basename) {
-		return basename + extension
+		c.Destination = basename + extension
+		return
 	}
-	return defaultFilename + extension
+
+	c.Destination = defaultFilename + extension
 }

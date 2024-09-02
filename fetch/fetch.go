@@ -2,79 +2,69 @@ package fetch
 
 import (
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
 
-	"github.com/assistcontrol/get/body"
-	"github.com/assistcontrol/get/config"
-	"github.com/assistcontrol/get/fetch/filename"
+	"github.com/assistcontrol/get/context"
 )
 
 // Simple check for an HTTP-like protocol
 var urlPattern = regexp.MustCompile(`^https?://`)
 
-func Fetch(c *config.Config) (*body.Body, error) {
+func Fetch(c *context.Ctx) error {
 	// Try local file first
-	b, err := local(c.URL)
-	if err == nil {
-		return b, err
+	if err := local(c); err == nil {
+		c.SetLocalFilename()
+		return nil
 	}
 
-	// Not a local file; fetch remotely
-	b, err = remote(c.URL)
-	if err != nil {
-		log.Fatalf("Error: %v", err)
+	if err := remote(c); err != nil {
+		return err
 	}
 
-	return b, nil
+	c.SetRemoteFilename()
+	return nil
 }
 
-func local(path string) (*body.Body, error) {
-	contents, err := os.ReadFile(path)
+func local(c *context.Ctx) error {
+	b, err := os.ReadFile(c.Path)
+	c.Body = b
 
-	b := &body.Body{
-		Body:     contents,
-		Filename: filename.FromLocalPath(path),
-	}
-
-	return b, err
+	return err
 }
 
-func remote(url string) (b *body.Body, err error) {
-	switch urlPattern.MatchString(url) {
-	case true:
+func remote(c *context.Ctx) error {
+	if urlPattern.MatchString(c.Path) {
 		// It's a full URL, so fetch it directly
-		b, err = getHTTP(url)
-
-	case false:
-		// Try HTTPS, then HTTP, then just give up
-		b, err = getHTTP("https://" + url)
-		if err != nil {
-			b, err = getHTTP("http://" + url)
-		}
+		c.URL = c.Path
+		return getHTTP(c)
 	}
 
-	return
+	// Try HTTPS, then HTTP, then just give up
+	c.URL = "https://" + c.Path
+	err := getHTTP(c)
+	if err != nil {
+		c.URL = "http://" + c.Path
+		err = getHTTP(c)
+	}
+
+	return err
 }
 
-func getHTTP(url string) (*body.Body, error) {
-	resp, err := http.Get(url)
+func getHTTP(c *context.Ctx) error {
+	resp, err := http.Get(c.URL)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	defer resp.Body.Close()
-	contents, err := io.ReadAll(resp.Body)
+	c.Body, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	b := &body.Body{
-		Body:     contents,
-		Filename: filename.FromHTTPResponse(resp),
-	}
+	c.Response = resp
 
-	return b, err
+	return err
 }

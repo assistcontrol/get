@@ -1,21 +1,26 @@
-package config
+package context
 
 import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 )
 
-type Config struct {
-	Filename string
-	Force    bool
-	Saving   bool
-	URL      string
+type Ctx struct {
+	Body        []byte
+	Destination string
+	Filename    string
+	Force       bool
+	Response    *http.Response
+	Path        string
+	Saving      bool
+	URL         string
 }
 
-func NewConfig() (*Config, error) {
-	c := &Config{}
+func New() (*Ctx, error) {
+	c := &Ctx{}
 
 	flag.BoolVar(&c.Force, "f", false, "overwrite existing files")
 	flag.BoolVar(&c.Saving, "o", false, "save output to `[filename]`, or leave empty to use a best guess")
@@ -25,11 +30,11 @@ func NewConfig() (*Config, error) {
 	switch {
 	case flag.NArg() == 1:
 		// If there's only one argument, it's a URL
-		c.URL = flag.Arg(0)
+		c.Path = flag.Arg(0)
 	case flag.NArg() == 2 && c.Saving:
 		// Two args is a filename and a URL, but only if -o is set
 		c.Filename = flag.Arg(0)
-		c.URL = flag.Arg(1)
+		c.Path = flag.Arg(1)
 	default:
 		return nil, errors.New("wrong number of arguments")
 	}

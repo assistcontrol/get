@@ -9,8 +9,7 @@ import (
 	"github.com/alecthomas/chroma/v2/formatters"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
-	"github.com/assistcontrol/get/body"
-	"github.com/assistcontrol/get/config"
+	"github.com/assistcontrol/get/context"
 	"golang.org/x/term"
 )
 
@@ -21,12 +20,12 @@ const (
 	ChromaStyle     = "catppuccin-mocha"
 )
 
-func Show(b *body.Body, _ *config.Config) {
+func Show(c *context.Ctx) {
 	if term.IsTerminal(int(os.Stdout.Fd())) {
-		b.Body = colorize(b.Body)
+		c.Body = colorize(c.Body)
 	}
 
-	fmt.Println(string(b.Body))
+	fmt.Println(string(c.Body))
 }
 
 func colorize(raw []byte) []byte {

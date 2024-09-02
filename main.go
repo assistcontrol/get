@@ -5,26 +5,29 @@ import (
 	"log"
 	"os"
 
-	"github.com/assistcontrol/get/config"
+	"github.com/assistcontrol/get/context"
 	"github.com/assistcontrol/get/fetch"
 	"github.com/assistcontrol/get/output"
 )
 
 func main() {
-	conf, err := config.NewConfig()
+	// Parse command line arguments
+	ctx, err := context.New()
 	if err != nil {
 		usage()
 	}
 
-	contents, err := fetch.Fetch(conf)
+	// Fetch the requested resource
+	err = fetch.Fetch(ctx)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 
-	if conf.Saving {
-		output.Get(contents, conf)
+	// Display or save it
+	if ctx.Saving {
+		output.Get(ctx)
 	} else {
-		output.Show(contents, conf)
+		output.Show(ctx)
 	}
 }
 
