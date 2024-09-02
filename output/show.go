@@ -10,6 +10,7 @@ import (
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/assistcontrol/get/body"
+	"github.com/assistcontrol/get/config"
 	"golang.org/x/term"
 )
 
@@ -20,7 +21,7 @@ const (
 	ChromaStyle     = "catppuccin-mocha"
 )
 
-func Show(b *body.Body) {
+func Show(b *body.Body, _ *config.Config) {
 	if term.IsTerminal(int(os.Stdout.Fd())) {
 		b.Body = colorize(b.Body)
 	}

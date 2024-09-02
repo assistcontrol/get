@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 
@@ -12,7 +14,8 @@ import (
 func main() {
 	conf, err := config.NewConfig(os.Args)
 	if err != nil {
-		log.Printf("Error: %v\n%s", err, help())
+		fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
+		showHelp()
 		os.Exit(1)
 	}
 
@@ -22,12 +25,13 @@ func main() {
 	}
 
 	if conf.ShouldSave() {
-		output.Get(contents)
+		output.Get(contents, conf)
 	} else {
-		output.Show(contents)
+		output.Show(contents, conf)
 	}
 }
 
-func help() string {
-	return "Usage: get <url>"
+func showHelp() {
+	fmt.Fprintf(os.Stderr, "Usage: get|show [flags] <URL>\n")
+	flag.PrintDefaults()
 }

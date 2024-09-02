@@ -12,13 +12,8 @@ import (
 	"github.com/assistcontrol/get/fetch/filename"
 )
 
-const defaultFilename = "get.output"
-
-var (
-
-	// Simple check for an HTTP-like protocol
-	urlPattern = regexp.MustCompile(`^https?://`)
-)
+// Simple check for an HTTP-like protocol
+var urlPattern = regexp.MustCompile(`^https?://`)
 
 func Fetch(c *config.Config) (*body.Body, error) {
 	// Try local file first
