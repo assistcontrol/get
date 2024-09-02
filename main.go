@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 
@@ -14,9 +13,7 @@ import (
 func main() {
 	conf, err := config.NewConfig()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
-		showHelp()
-		os.Exit(1)
+		usage()
 	}
 
 	contents, err := fetch.Fetch(conf)
@@ -31,7 +28,7 @@ func main() {
 	}
 }
 
-func showHelp() {
-	fmt.Fprintf(os.Stderr, "Usage: get [flags] <URL>\n")
-	flag.PrintDefaults()
+func usage() {
+	flag.Usage()
+	os.Exit(1)
 }
