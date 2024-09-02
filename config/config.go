@@ -15,14 +15,11 @@ type Config struct {
 }
 
 func NewConfig() (*Config, error) {
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: get [-f] [-o [filename]] <URL or path>\n")
-		flag.PrintDefaults()
-	}
-
 	c := &Config{}
+
 	flag.BoolVar(&c.Force, "f", false, "overwrite existing files")
 	flag.BoolVar(&c.Saving, "o", false, "save output to `[filename]`, or leave empty to use a best guess")
+	flag.Usage = usage
 	flag.Parse()
 
 	switch {
@@ -38,4 +35,9 @@ func NewConfig() (*Config, error) {
 	}
 
 	return c, nil
+}
+
+func usage() {
+	fmt.Fprintf(os.Stderr, "Usage: get [-f] [-o [filename]] <URL or path>\n")
+	flag.PrintDefaults()
 }
