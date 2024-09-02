@@ -15,12 +15,12 @@ import (
 
 const (
 	// Default values for Chroma
-	ChromaDefaultFT = "html"
-	ChromaFormat    = "terminal16m"
-	ChromaStyle     = "catppuccin-mocha"
+	chromaDefaultFT = "html"
+	chromaFormat    = "terminal16m"
+	chromaStyle     = "catppuccin-mocha"
 )
 
-func Show(c *context.Ctx) {
+func show(c *context.Ctx) {
 	if term.IsTerminal(int(os.Stdout.Fd())) {
 		c.Body = colorize(c.Body)
 	}
@@ -33,16 +33,16 @@ func colorize(raw []byte) []byte {
 
 	lexer := lexers.Analyse(contents)
 	if lexer == nil {
-		lexer = lexers.Get(ChromaDefaultFT)
+		lexer = lexers.Get(chromaDefaultFT)
 	}
 	lexer = chroma.Coalesce(lexer)
 
-	style := styles.Get(ChromaStyle)
+	style := styles.Get(chromaStyle)
 	if style == nil {
 		style = styles.Fallback
 	}
 
-	formatter := formatters.Get(ChromaFormat)
+	formatter := formatters.Get(chromaFormat)
 	if formatter == nil {
 		formatter = formatters.Fallback
 	}

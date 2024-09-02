@@ -14,7 +14,8 @@ func main() {
 	// Parse command line arguments
 	ctx, err := context.New()
 	if err != nil {
-		usage()
+		flag.Usage()
+		os.Exit(1)
 	}
 
 	// Fetch the requested resource
@@ -24,14 +25,5 @@ func main() {
 	}
 
 	// Display or save it
-	if ctx.Saving {
-		output.Get(ctx)
-	} else {
-		output.Show(ctx)
-	}
-}
-
-func usage() {
-	flag.Usage()
-	os.Exit(1)
+	output.Output(ctx)
 }

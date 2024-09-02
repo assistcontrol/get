@@ -7,7 +7,15 @@ import (
 	"github.com/assistcontrol/get/context"
 )
 
-func Get(c *context.Ctx) {
+func Output(c *context.Ctx) {
+	if c.Save {
+		save(c)
+	} else {
+		show(c)
+	}
+}
+
+func save(c *context.Ctx) {
 	flags := os.O_WRONLY | os.O_CREATE
 	switch c.Force {
 	case true:
