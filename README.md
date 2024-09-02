@@ -20,8 +20,10 @@ A *very* simple file/web viewer and fetcher.
 
 - Works on local paths and remote URLs (HTTP/HTTPS only)
   - If it's an existing file, it'll display that
-  - URLs can be specified with or without a protocol (ex. `example.com` is the same as `https://example.com`)
-  - Unless `http://` is specified, will always try HTTPS first and fall back to HTTP
+  - URLs can be specified with or without a protocol
+    (ex. `example.com` is the same as `https://example.com`)
+  - Unless `http://` is specified, will always try HTTPS first
+    and fall back to HTTP
 - Automatic syntax highlighting if it's outputting to a terminal
 - `-o` without a `filename` will guess an appropriate name
   - Extension is determined based on `Content-Type`
