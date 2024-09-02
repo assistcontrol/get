@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	conf, err := config.NewConfig(os.Args)
+	conf, err := config.NewConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
 		showHelp()
@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("Error: %v", err)
 	}
 
-	if conf.ShouldSave() {
+	if conf.Saving {
 		output.Get(contents, conf)
 	} else {
 		output.Show(contents, conf)
@@ -32,6 +32,6 @@ func main() {
 }
 
 func showHelp() {
-	fmt.Fprintf(os.Stderr, "Usage: get|show [flags] <URL>\n")
+	fmt.Fprintf(os.Stderr, "Usage: get [flags] <URL>\n")
 	flag.PrintDefaults()
 }

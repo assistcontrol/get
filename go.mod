@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/alecthomas/chroma/v2 v2.14.0
+	github.com/jessevdk/go-flags v1.6.1
 	golang.org/x/term v0.23.0
 )
 

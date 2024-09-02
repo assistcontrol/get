@@ -1,57 +1,51 @@
 package config
 
 import (
-	"errors"
-	"flag"
 	"fmt"
-	"path/filepath"
-)
+	"os"
 
-type mode int
-
-const (
-	get mode = iota
-	show
+	flags "github.com/jessevdk/go-flags"
 )
 
 type Config struct {
-	Mode     mode
 	Filename string
 	Force    bool
+	Saving   bool
 	URL      string
 }
 
-func (c *Config) ShouldSave() bool {
-	return c.Mode == get
+var opts struct {
+	Force  bool `short:"f" description:"overwrite existing files"`
+	Output bool `short:"o" description:"save output to 'filename', or leave empty to use a best guess"`
 }
 
-func NewConfig(args []string) (*Config, error) {
-	arg0 := filepath.Base(args[0])
-
+func NewConfig() (*Config, error) {
 	c := &Config{}
 
-	showFlag := flag.Bool("show", false, "output to stdout")
-	flag.BoolVar(&c.Force, "f", false, "overwrite existing files")
-	flag.StringVar(&c.Filename, "o", "", "save output to `filename`")
-	flag.Parse()
+	p := flags.NewParser(&opts, flags.Default)
+	p.Usage = `[-f] [-o [filename]] <URL or path>`
 
-	if flag.NArg() != 1 {
-		return nil, errors.New("path or URL required")
+	remaining, err := p.Parse()
+	if err != nil {
+		return nil, err
 	}
 
-	c.URL = flag.Arg(0)
-
 	switch {
-	case arg0 == "get" && *showFlag:
-		c.Mode = show
-	case arg0 == "get":
-		c.Mode = get
-	case arg0 == "show" && c.Filename != "":
-		c.Mode = get
-	case arg0 == "show":
-		c.Mode = show
+	case len(remaining) == 1:
+		c.URL = remaining[0]
+		if opts.Output {
+			c.Saving = true
+		}
+	case len(remaining) == 2 && opts.Output:
+		c.Filename = remaining[0]
+		c.URL = remaining[1]
+		c.Saving = true
+	case len(remaining) == 0:
+		fmt.Fprintf(os.Stderr, "ERROR: path or URL required\n\n")
+		fallthrough
 	default:
-		return nil, fmt.Errorf("unknown command: %s", arg0)
+		p.WriteHelp(os.Stderr)
+		os.Exit(1)
 	}
 
 	return c, nil
