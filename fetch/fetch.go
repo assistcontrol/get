@@ -2,6 +2,7 @@
 package fetch
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -67,13 +68,15 @@ func remote(c *context.Ctx) error {
 // fetched or something went wacky.
 func getHTTP(c *context.Ctx) error {
 	resp, err := http.Get(c.URL)
-	if err != nil {
+	switch {
+	case err != nil:
 		return err
+	case resp.StatusCode != http.StatusOK:
+		return fmt.Errorf("HTTP error: %s", resp.Status)
 	}
 
 	defer resp.Body.Close()
-	c.Body, err = io.ReadAll(resp.Body)
-	if err != nil {
+	if c.Body, err = io.ReadAll(resp.Body); err != nil {
 		return err
 	}
 
