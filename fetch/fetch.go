@@ -34,7 +34,7 @@ func Fetch(c *context.Ctx) (err error) {
 }
 
 // local reads a file from the local filesystem.
-// It returns an error if the file cannot be read.
+// It returns an error if the file isn't readable or doesn't exist.
 func local(c *context.Ctx) error {
 	b, err := os.ReadFile(c.Path)
 	c.Body = b
@@ -42,11 +42,10 @@ func local(c *context.Ctx) error {
 	return err
 }
 
-// remote fetches a file from a remote URL.
-// If the protocol isn't specified, try HTTPS then HTTP.
+// remote oversees fetching a file from a remote URL.
 func remote(c *context.Ctx) error {
+	// If it's got a protocol already, fetch it directly
 	if urlPattern.MatchString(c.Path) {
-		// It's a full URL, so fetch it directly
 		c.URL = c.Path
 		return getHTTP(c)
 	}
@@ -64,7 +63,8 @@ func remote(c *context.Ctx) error {
 
 // getHTTP fetches a file from a remote URL using the HTTP protocol.
 // If successful, it saves the http.Response object and extracts the
-// body of the response. It returns an error if the file cannot be fetched.
+// body of the response. It returns an error if the file cannot be
+// fetched or something went wacky.
 func getHTTP(c *context.Ctx) error {
 	resp, err := http.Get(c.URL)
 	if err != nil {

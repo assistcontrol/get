@@ -12,10 +12,8 @@ import (
 const defaultFilename = "get.output"
 
 var (
-	// A filename that includes an extension
-	filenameWithExtension = regexp.MustCompile(`\.\w+$`)
-	// A filename with no extension
-	filenameWithoutExtension = regexp.MustCompile(`^\w+$`)
+	baseWithExtension    = regexp.MustCompile(`\.\w+$`) // A filename that includes an extension
+	baseWithoutExtension = regexp.MustCompile(`^\w+$`)  // A filename with no extension
 )
 
 // SetLocalFilename sets the destination filename for a local file.
@@ -52,7 +50,7 @@ func (c *Ctx) SetRemoteFilename() {
 	basename := filepath.Base(c.Response.Request.URL.RequestURI())
 
 	// If we have a complete filename, use it
-	if filenameWithExtension.MatchString(basename) {
+	if baseWithExtension.MatchString(basename) {
 		c.Destination = basename
 		return
 	}
@@ -66,6 +64,7 @@ func (c *Ctx) SetRemoteFilename() {
 		c.Destination = defaultFilename
 		return
 	}
+
 	// Go only includes extentions for a couple mimetypes, but it
 	// should be enough for the situation we're in. It's pretty
 	// unlikely that a .../foo or .../foo/ endpoint will be
@@ -75,13 +74,14 @@ func (c *Ctx) SetRemoteFilename() {
 		c.Destination = defaultFilename
 		return
 	}
+
 	// The mime package looks at system mimetype lists. Those lists
 	// are almost always constructed with the most common extension
 	// first, which mime puts last because reasons.
 	extension := extensions[len(extensions)-1]
 
 	// In the ../foo case, use "foo" for the filename.
-	if filenameWithoutExtension.MatchString(basename) {
+	if baseWithoutExtension.MatchString(basename) {
 		c.Destination = basename + extension
 		return
 	}
