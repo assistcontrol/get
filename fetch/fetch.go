@@ -21,14 +21,14 @@ var urlPattern = regexp.MustCompile(`^https?://`)
 func Fetch(c *context.Ctx) (err error) {
 	// Try local file first
 	if err = local(c); err == nil {
-		c.SetLocalFilename()
+		setLocalFilename(c)
 		return
 	}
 
 	// Non-nil err means local file not found, so try fetching
 	// it remotely
 	if err = remote(c); err == nil {
-		c.SetRemoteFilename()
+		setRemoteFilename(c)
 	}
 
 	return

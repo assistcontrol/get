@@ -1,9 +1,11 @@
-package context
+package fetch
 
 import (
 	"mime"
 	"path/filepath"
 	"regexp"
+
+	"github.com/assistcontrol/get/context"
 )
 
 // defaultFilename is the filename used when the user hasn't specified one,
@@ -16,9 +18,9 @@ var (
 	baseWithoutExtension = regexp.MustCompile(`^\w+$`)  // A filename with no extension
 )
 
-// SetLocalFilename sets the destination filename for a local file.
+// setLocalFilename sets the destination filename for a local file.
 // If the user has specified a filename, it uses that.
-func (c *Ctx) SetLocalFilename() {
+func setLocalFilename(c *context.Ctx) {
 	if c.Filename != "" {
 		c.Destination = c.Filename
 		return
@@ -27,13 +29,13 @@ func (c *Ctx) SetLocalFilename() {
 	c.Destination = filepath.Base(c.Path)
 }
 
-// SetRemoteFilename sets the destination filename for a remote file.
+// setRemoteFilename sets the destination filename for a remote file.
 // If the user has specified a filename, it uses that.
 // It tries to determine the filename from the URL and Content-Type.
 // If it can't, it uses a default filename. This function should be
 // called after the response has been received, or it will fall back
 // to the default filename.
-func (c *Ctx) SetRemoteFilename() {
+func setRemoteFilename(c *context.Ctx) {
 	// If the user has specified a filename, use it.
 	if c.Filename != "" {
 		c.Destination = c.Filename
