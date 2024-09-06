@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// Parse command line arguments
-	ctx, err := context.New()
+	ctx, err := context.New(os.Args[1:])
 	if err != nil {
 		flag.Usage()
 		os.Exit(1)

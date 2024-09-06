@@ -23,15 +23,23 @@ type Ctx struct {
 	URL         string         // Crafted URL to try fetching
 }
 
+var force, save bool
+
+func init() {
+	flag.BoolVar(&force, "f", false, "overwrite existing files")
+	flag.BoolVar(&save, "o", false, "save output to `[filename]`, or leave empty to use a best guess")
+	flag.Usage = usage
+}
+
 // New creates a new context from the command line arguments.
 // It returns an error if the arguments are invalid.
-func New() (*Ctx, error) {
-	c := &Ctx{}
-
-	flag.BoolVar(&c.Force, "f", false, "overwrite existing files")
-	flag.BoolVar(&c.Save, "o", false, "save output to `[filename]`, or leave empty to use a best guess")
-	flag.Usage = usage
-	flag.Parse()
+func New(args []string) (*Ctx, error) {
+	flag.CommandLine.Init("get", flag.ContinueOnError)
+	flag.CommandLine.Parse(args)
+	c := &Ctx{
+		Force: force,
+		Save:  save,
+	}
 
 	switch {
 	case flag.NArg() == 1:

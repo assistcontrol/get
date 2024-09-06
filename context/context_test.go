@@ -1,7 +1,6 @@
 package context
 
 import (
-	"os"
 	"testing"
 )
 
@@ -23,18 +22,54 @@ func compareCtx(t *testing.T, got, expected *Ctx) {
 	}
 }
 
-func TestNew(t *testing.T) {
-	os.Args = []string{"get", "-o", "output.txt", "https://example.com"}
-	expected := &Ctx{
-		Path:     "https://example.com",
-		Force:    false,
-		Save:     true,
-		Filename: "output.txt",
-	}
+var newScenarios = []struct {
+	args     []string
+	expected *Ctx
+}{
+	{
+		args: []string{"https://example.com"},
+		expected: &Ctx{
+			Path:     "https://example.com",
+			Force:    false,
+			Save:     false,
+			Filename: "",
+		},
+	},
+	{
+		args: []string{"-o", "https://example.com"},
+		expected: &Ctx{
+			Path:     "https://example.com",
+			Force:    false,
+			Save:     true,
+			Filename: "",
+		},
+	},
+	{
+		args: []string{"-o", "output.txt", "https://example.com"},
+		expected: &Ctx{
+			Path:     "https://example.com",
+			Force:    false,
+			Save:     true,
+			Filename: "output.txt",
+		},
+	},
+	{
+		args: []string{"-f", "-o", "foo", "https://example.com"},
+		expected: &Ctx{
+			Path:     "https://example.com",
+			Force:    true,
+			Save:     true,
+			Filename: "foo",
+		},
+	},
+}
 
-	c, err := New()
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
+func TestNew(t *testing.T) {
+	for _, s := range newScenarios {
+		c, err := New(s.args)
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		compareCtx(t, c, s.expected)
 	}
-	compareCtx(t, c, expected)
 }
