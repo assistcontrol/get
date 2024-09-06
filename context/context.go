@@ -34,8 +34,10 @@ func init() {
 // New creates a new context from the command line arguments.
 // It returns an error if the arguments are invalid.
 func New(args []string) (*Ctx, error) {
-	flag.CommandLine.Init("get", flag.ContinueOnError)
-	flag.CommandLine.Parse(args)
+	if err := flag.CommandLine.Parse(args); err != nil {
+		return nil, err
+	}
+
 	c := &Ctx{
 		Force: force,
 		Save:  save,
