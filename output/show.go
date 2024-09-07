@@ -2,6 +2,7 @@ package output
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/alecthomas/chroma/v2/styles"
 	"github.com/assistcontrol/get/context"
 	"golang.org/x/term"
+	"golang.org/x/tools/godoc/util"
 )
 
 const (
@@ -24,6 +26,11 @@ const (
 // (if it's a terminal), or prints it as-is.
 func show(c *context.Ctx) error {
 	if term.IsTerminal(int(os.Stdout.Fd())) {
+		// Don't try to display binary data to a terminal
+		if !util.IsText(c.Body) {
+			return errors.New("cannot display binary data to a terminal")
+		}
+
 		c.Body = colorize(c.Body)
 	}
 
