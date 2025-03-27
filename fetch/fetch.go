@@ -75,7 +75,12 @@ func getHTTP(c *context.Ctx) error {
 		return fmt.Errorf("HTTP error: %s", resp.Status)
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			panic("Response body close error: " + err.Error())
+		}
+	}()
+
 	if c.Body, err = io.ReadAll(resp.Body); err != nil {
 		return err
 	}
